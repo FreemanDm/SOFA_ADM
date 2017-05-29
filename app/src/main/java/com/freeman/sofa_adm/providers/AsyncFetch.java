@@ -1,170 +1,113 @@
 package com.freeman.sofa_adm.providers;
 
-import android.app.Activity;
-import android.app.ProgressDialog;
-import android.content.Context;
 import android.os.AsyncTask;
-import android.support.v7.widget.DividerItemDecoration;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.widget.Toast;
+import android.view.View;
+import android.widget.ProgressBar;
 
-import com.freeman.sofa_adm.R;
 import com.freeman.sofa_adm.activity.CategoryList;
 import com.freeman.sofa_adm.adapters.AdapterCategory;
 import com.freeman.sofa_adm.model.CategoryTranslate;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Freeman on 23.05.2017.
  */
 
-public class AsyncFetch extends AsyncTask<CategoryTranslate, String, String> {
+public class AsyncFetch extends AsyncTask<Void, Void, ArrayList<CategoryTranslate>> {
 
-//    private static final String TAG = "C";
-    //        ProgressDialog pdLoading = new ProgressDialog();
     private HttpURLConnection conn;
     private URL url = null;
-    private RecyclerView categoryList;
     private AdapterCategory adapterCategory;
-    private Activity mActivity;
-
-//    public AsyncFetch(){
-//        adapterCategory = new AdapterCategory();
-//    }
+    private ProgressBar myProgress;
 
 
-    public AsyncFetch(Activity activity) {
-        this.mActivity = activity;
+    public AsyncFetch(AdapterCategory adapterCategory,ProgressBar myProgress) {
+        this.adapterCategory = adapterCategory;
+        this.myProgress = myProgress;
     }
 
     @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-//            pdLoading.setMessage("\tLoading...");
-//            pdLoading.setCancelable(false);
-//            pdLoading.show();
+    protected void onPreExecute() {
+        super.onPreExecute();
+        myProgress.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    protected ArrayList<CategoryTranslate> doInBackground(Void... params) {
+        ArrayList<CategoryTranslate> categories = null;
+        try {
+            url = new URL("https://sofaapp.herokuapp.com/category/all");
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            return categories;
         }
+        try {
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setReadTimeout(CategoryList.READ_TIMEOUT);
+            conn.setConnectTimeout(CategoryList.CONNECTION_TIMEOUT);
+            conn.setRequestMethod("GET");
+        } catch (IOException e1) {
+            e1.printStackTrace();
+            return categories;
+        }
+        try {
+            int response_code = conn.getResponseCode();
 
-        @Override
-        protected String doInBackground(CategoryTranslate... params) {
-            try {
-                url = new URL("https://sofaapp.herokuapp.com/category/all");
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-                return e.toString();
-            }
-            try {
-                conn = (HttpURLConnection) url.openConnection();
-                conn.setReadTimeout(CategoryList.READ_TIMEOUT);
-                conn.setConnectTimeout(CategoryList.CONNECTION_TIMEOUT);
-                conn.setRequestMethod("GET");
+            if (response_code == HttpURLConnection.HTTP_OK) {
+                InputStream input = conn.getInputStream();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+                StringBuilder result = new StringBuilder();
+                String line;
 
-                conn.setDoOutput(true);
-            } catch (IOException e1) {
-                e1.printStackTrace();
-                return e1.toString();
-            }
-            try {
-                int response_code = conn.getResponseCode();
-
-                if (response_code == HttpURLConnection.HTTP_OK){
-                    InputStream input = conn.getInputStream();
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-                    StringBuilder result = new StringBuilder();
-                    String line;
-
-                    while ((line = reader.readLine())!= null){
-                        result.append(line);
-                    }
-                    return (result.toString());
-                }else {
-                    return ("unsuccessful");
+                while ((line = reader.readLine()) != null) {
+                    result.append(line);
                 }
-                ArrayList<CategoryTranslate> data = new ArrayList<>();
-                try {
-                    JSONArray jArray = new JSONArray(result);
 
-                    for (int i = 0; i < jArray.length(); i++) {
-                        JSONObject json_data = jArray.getJSONObject(i);
-                        CategoryTranslate categoryTranslate = new CategoryTranslate();
-                        categoryTranslate.setName(json_data.getString("name"));
-                        data.add(categoryTranslate);
-                    }
-                }  catch (JSONException e) {
-//                Toast.makeText(CategoryList.this, e.toString(), Toast.LENGTH_LONG).show();
-//                Log.d(TAG,"Connected");
+                Log.d("MY_TAG", "doInBackground: result : " + result);
+                Gson gson = new Gson();
+                Type itemsListType = new TypeToken<List<CategoryTranslate>>() {
+                }.getType();
+                categories = gson.fromJson(result.toString(), itemsListType);
+                return categories;
+            } else {
+                InputStream input = conn.getErrorStream();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+                StringBuilder result = new StringBuilder();
+                String line;
+
+                while ((line = reader.readLine()) != null) {
+                    result.append(line);
+                }
+
+                Log.d("MY_TAG", "doInBackground: error server code : "+conn.getResponseCode() + " \nerror response : " + result);
+                return categories;
             }
-
-            } catch (IOException e) {
-                e.printStackTrace();
-                return e.toString();
-            } finally {
-                conn.disconnect();
-            }
-
-//            ArrayList<CategoryTranslate> data = new ArrayList<>();
-//            String result;
-//            try{
-//                JSONArray jArray = new JSONArray(result);
-//
-//                for (int i = 0; i < jArray.length(); i++){
-//                    JSONObject json_data = jArray.getJSONObject(i);
-//                    CategoryTranslate categoryTranslate = new CategoryTranslate();
-//                    categoryTranslate.setName(json_data.getString("name"));
-//                    data.add(categoryTranslate);
-//                }
-
-
-//                DividerItemDecoration divader = new DividerItemDecoration(mActivity, DividerItemDecoration.VERTICAL);
-//                categoryList.setLayoutManager(new LinearLayoutManager(mActivity));
-//                categoryList.addItemDecoration(divader);
-//                adapterCategory = new AdapterCategory(mActivity, data);
-//                categoryList.setAdapter(adapterCategory);
-
-
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-//            pdLoading.dismiss();
-//            ArrayList<CategoryTranslate> data = new ArrayList<>();
-
-//            pdLoading.dismiss();
-//            try{
-//                JSONArray jArray = new JSONArray(result);
-//
-//                for (int i = 0; i < jArray.length(); i++){
-//                    JSONObject json_data = jArray.getJSONObject(i);
-//                    CategoryTranslate categoryTranslate = new CategoryTranslate();
-//                    categoryTranslate.setName(json_data.getString("name"));
-//                    data.add(categoryTranslate);
-//                }
-//
-//                categoryList = (RecyclerView)findViewById(R.id.category_list);
-//
-                DividerItemDecoration divader = new DividerItemDecoration(mActivity, DividerItemDecoration.VERTICAL);
-                categoryList.setLayoutManager(new LinearLayoutManager(mActivity));
-                categoryList.addItemDecoration(divader);
-                adapterCategory = new AdapterCategory();
-                categoryList.setAdapter(adapterCategory);
-//
-//            } catch (JSONException e) {
-//                Toast.makeText(CategoryList.this, e.toString(), Toast.LENGTH_LONG).show();
-////                Log.d(TAG,"Connected");
-//            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return categories;
+        } finally {
+            conn.disconnect();
         }
     }
+
+    @Override
+    protected void onPostExecute(ArrayList<CategoryTranslate> result) {
+        myProgress.setVisibility(View.GONE);
+        if (result != null) {
+            adapterCategory.updateList(result);
+        }
+    }
+}

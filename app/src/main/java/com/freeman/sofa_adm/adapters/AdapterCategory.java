@@ -28,27 +28,13 @@ public class AdapterCategory extends RecyclerView.Adapter<AdapterCategory.Catego
     private Context context;
     private LayoutInflater inflater;
     private ArrayList<CategoryTranslate> categories = new ArrayList<>();
-//    CategoryTranslate current;
-//    int currentPos = 0;
 
-    public AdapterCategory(Context context, ArrayList<CategoryTranslate> categories) {
+    public AdapterCategory(Context context) {
         this.context = context;
         inflater = LayoutInflater.from(context);
-        this.categories = categories;
     }
 
-    public AdapterCategory(){
-        fill();
-    }
-
-    private void fill() {
-        categories.add(new CategoryTranslate("Qwerty"));
-        categories.add(new CategoryTranslate("Qwerty1"));
-        categories.add(new CategoryTranslate("Qwerty2"));
-        categories.add(new CategoryTranslate("Qwerty3"));
-    }
-
-    private void updateList (ArrayList<CategoryTranslate> categoryTranslates){
+    public void updateList (ArrayList<CategoryTranslate> categoryTranslates){
         categories.clear();
         for (CategoryTranslate category: categoryTranslates) {
             categories.add(category);

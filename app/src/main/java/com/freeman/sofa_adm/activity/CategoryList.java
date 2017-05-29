@@ -12,6 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ProgressBar;
 
 import com.freeman.sofa_adm.R;
 import com.freeman.sofa_adm.adapters.AdapterCategory;
@@ -22,8 +23,9 @@ public class CategoryList extends AppCompatActivity
 
     public static final int CONNECTION_TIMEOUT = 10000;
     public static final int READ_TIMEOUT = 15000;
-//    private RecyclerView categoryList;
-//    private AdapterCategory adapterCategory;
+    private RecyclerView categoryList;
+    private AdapterCategory adapterCategory;
+    private ProgressBar myProgress;
 
 //    private String TAG = "C";
 //
@@ -47,13 +49,15 @@ public class CategoryList extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-//        categoryList = (RecyclerView) findViewById(R.id.category_list);
-//        DividerItemDecoration divader = new DividerItemDecoration(CategoryList.this, DividerItemDecoration.VERTICAL);
-//        categoryList.setLayoutManager(new LinearLayoutManager(CategoryList.this));
-//        categoryList.addItemDecoration(divader);
-//        categoryList.setAdapter(adapterCategory);
+        myProgress = (ProgressBar) findViewById(R.id.my_progress);
+        adapterCategory = new AdapterCategory(this);
+        categoryList = (RecyclerView) findViewById(R.id.category_list);
+        DividerItemDecoration divader = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
+        categoryList.setLayoutManager(new LinearLayoutManager(this));
+        categoryList.addItemDecoration(divader);
+        categoryList.setAdapter(adapterCategory);
 
-        new AsyncFetch().execute();
+        new AsyncFetch(adapterCategory, myProgress).execute();
     }
 
     @Override
@@ -80,6 +84,9 @@ public class CategoryList extends AppCompatActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
+        if(id == R.id.refresh_menu_item){
+            new AsyncFetch(adapterCategory, myProgress).execute();
+        }
         //noinspection SimplifiableIfStatement
 //        if (id == R.id.action_settings) {
 //            return true;
