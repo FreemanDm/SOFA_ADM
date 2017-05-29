@@ -32,7 +32,7 @@ import java.util.ArrayList;
  * Created by Freeman on 23.05.2017.
  */
 
-public class AsyncFetch extends AsyncTask<String, String, String> {
+public class AsyncFetch extends AsyncTask<CategoryTranslate, String, String> {
 
 //    private static final String TAG = "C";
     //        ProgressDialog pdLoading = new ProgressDialog();
@@ -60,7 +60,7 @@ public class AsyncFetch extends AsyncTask<String, String, String> {
         }
 
         @Override
-        protected String doInBackground(String... params) {
+        protected String doInBackground(CategoryTranslate... params) {
             try {
                 url = new URL("https://sofaapp.herokuapp.com/category/all");
             } catch (MalformedURLException e) {
@@ -90,10 +90,25 @@ public class AsyncFetch extends AsyncTask<String, String, String> {
                     while ((line = reader.readLine())!= null){
                         result.append(line);
                     }
-                    return String.valueOf((result));
+                    return (result.toString());
                 }else {
                     return ("unsuccessful");
                 }
+                ArrayList<CategoryTranslate> data = new ArrayList<>();
+                try {
+                    JSONArray jArray = new JSONArray(result);
+
+                    for (int i = 0; i < jArray.length(); i++) {
+                        JSONObject json_data = jArray.getJSONObject(i);
+                        CategoryTranslate categoryTranslate = new CategoryTranslate();
+                        categoryTranslate.setName(json_data.getString("name"));
+                        data.add(categoryTranslate);
+                    }
+                }  catch (JSONException e) {
+//                Toast.makeText(CategoryList.this, e.toString(), Toast.LENGTH_LONG).show();
+//                Log.d(TAG,"Connected");
+            }
+
             } catch (IOException e) {
                 e.printStackTrace();
                 return e.toString();
@@ -101,17 +116,17 @@ public class AsyncFetch extends AsyncTask<String, String, String> {
                 conn.disconnect();
             }
 
-            ArrayList<CategoryTranslate> data = new ArrayList<>();
-            String result;
-            try{
-                JSONArray jArray = new JSONArray(result);
-
-                for (int i = 0; i < jArray.length(); i++){
-                    JSONObject json_data = jArray.getJSONObject(i);
-                    CategoryTranslate categoryTranslate = new CategoryTranslate();
-                    categoryTranslate.setName(json_data.getString("name"));
-                    data.add(categoryTranslate);
-                }
+//            ArrayList<CategoryTranslate> data = new ArrayList<>();
+//            String result;
+//            try{
+//                JSONArray jArray = new JSONArray(result);
+//
+//                for (int i = 0; i < jArray.length(); i++){
+//                    JSONObject json_data = jArray.getJSONObject(i);
+//                    CategoryTranslate categoryTranslate = new CategoryTranslate();
+//                    categoryTranslate.setName(json_data.getString("name"));
+//                    data.add(categoryTranslate);
+//                }
 
 
 //                DividerItemDecoration divader = new DividerItemDecoration(mActivity, DividerItemDecoration.VERTICAL);
@@ -120,10 +135,7 @@ public class AsyncFetch extends AsyncTask<String, String, String> {
 //                adapterCategory = new AdapterCategory(mActivity, data);
 //                categoryList.setAdapter(adapterCategory);
 
-            } catch (JSONException e) {
-//                Toast.makeText(CategoryList.this, e.toString(), Toast.LENGTH_LONG).show();
-//                Log.d(TAG,"Connected");
-            }
+
         }
 
         @Override
