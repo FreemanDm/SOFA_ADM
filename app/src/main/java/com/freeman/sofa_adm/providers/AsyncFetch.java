@@ -78,8 +78,7 @@ public class AsyncFetch extends AsyncTask<Void, Void, ArrayList<CategoryTranslat
 
                 Log.d("MY_TAG", "doInBackground: result : " + result);
                 Gson gson = new Gson();
-                Type itemsListType = new TypeToken<List<CategoryTranslate>>() {
-                }.getType();
+                Type itemsListType = new TypeToken<List<CategoryTranslate>>() {}.getType();
                 categories = gson.fromJson(result.toString(), itemsListType);
                 return categories;
             } else {

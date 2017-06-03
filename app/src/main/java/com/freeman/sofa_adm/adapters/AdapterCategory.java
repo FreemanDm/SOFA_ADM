@@ -2,22 +2,17 @@ package com.freeman.sofa_adm.adapters;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
 import com.freeman.sofa_adm.R;
-import com.freeman.sofa_adm.model.Branch;
-import com.freeman.sofa_adm.model.Category;
 import com.freeman.sofa_adm.model.CategoryTranslate;
-import com.freeman.sofa_adm.model.Language;
 
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Created by Freeman on 20.05.2017.

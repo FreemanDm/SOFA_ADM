@@ -1,5 +1,6 @@
 package com.freeman.sofa_adm.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
@@ -18,20 +19,13 @@ import com.freeman.sofa_adm.R;
 import com.freeman.sofa_adm.adapters.AdapterCategory;
 import com.freeman.sofa_adm.providers.AsyncFetch;
 
-public class CategoryList extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+public class CategoryList extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     public static final int CONNECTION_TIMEOUT = 10000;
     public static final int READ_TIMEOUT = 15000;
     private RecyclerView categoryList;
     private AdapterCategory adapterCategory;
     private ProgressBar myProgress;
-
-//    private String TAG = "C";
-//
-//    public CategoryList(){
-//        adapterCategory = new AdapterCategory();
-//    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,6 +80,10 @@ public class CategoryList extends AppCompatActivity
 
         if(id == R.id.refresh_menu_item){
             new AsyncFetch(adapterCategory, myProgress).execute();
+        }
+        if(id == R.id.add_menu_item){
+            Intent intent = new Intent(this, Add_Place.class);
+            startActivity(intent);
         }
         //noinspection SimplifiableIfStatement
 //        if (id == R.id.action_settings) {
